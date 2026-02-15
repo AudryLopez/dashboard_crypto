@@ -1,29 +1,26 @@
-// components/providers/client-providers.tsx
-"use client";
+'use client'
 
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { PropsWithChildren, useEffect, useMemo, useState } from "react";
-import { AnimatePresence } from "framer-motion";
-import { usePathname } from "next/navigation";
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
+import { useState } from 'react'
 
-export function ClientProviders({ children }: PropsWithChildren) {
-  const [queryClient] = useState(() => new QueryClient());
-  const pathname = usePathname();
+interface ClientProvidersProps {
+  children: React.ReactNode
+}
 
-  const isProject = useMemo(() => pathname.startsWith("/projects/"), [pathname]);
+export function ClientProviders(p: ClientProvidersProps) {
+  const { children } = p
 
-  useEffect(() => {
-    // Tu fix para el log de Shadcn
-    window.console.error = window.console.log;
-  }, []);
+  const [queryClient] = useState(
+    () =>
+      new QueryClient({
+        defaultOptions: {
+          queries: {
+            staleTime: 60 * 1000,
+            refetchOnWindowFocus: false,
+          },
+        },
+      })
+  )
 
-  return (
-    <QueryClientProvider client={queryClient}>
-      <div className="w-full overflow-y-hidden mx-auto max-w-display-wide">
-        <AnimatePresence mode="wait" initial={false}>
-          {children}
-        </AnimatePresence>
-      </div>
-    </QueryClientProvider>
-  );
+  return <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
 }
